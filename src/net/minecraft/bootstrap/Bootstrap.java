@@ -25,6 +25,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
+
 /*     */
 /*     */
 
@@ -146,7 +148,7 @@ public class Bootstrap extends JFrame {
 		println("Reversing LZMA on " + this.packedLauncherJar + " to "
 				+ lzmaUnpacked);
 		try {
-			inputHandle = new LZMA.LzmaInputStream(new FileInputStream(
+			inputHandle = new LZMACompressorInputStream(new FileInputStream(
 					this.packedLauncherJar));
 			outputHandle = new FileOutputStream(lzmaUnpacked);
 
@@ -243,6 +245,7 @@ public class Bootstrap extends JFrame {
 
 		if (shouldScroll) {
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					scrollBar.setValue(Integer.MAX_VALUE);
 				}
@@ -376,20 +379,19 @@ public class Bootstrap extends JFrame {
 			return;
 		}
 
-		String hostName = (String) optionSet.valueOf(proxyHostOption);
+		String hostName = optionSet.valueOf(proxyHostOption);
 		Proxy proxy = Proxy.NO_PROXY;
 		if (hostName != null) {
 			try {
 				proxy = new Proxy(java.net.Proxy.Type.SOCKS,
-						new java.net.InetSocketAddress(hostName,
-								((Integer) optionSet.valueOf(proxyPortOption))
-										.intValue()));
+						new java.net.InetSocketAddress(hostName, optionSet
+								.valueOf(proxyPortOption).intValue()));
 			} catch (Exception ignored) {
 			}
 		}
 
-		String proxyUser = (String) optionSet.valueOf(proxyUserOption);
-		String proxyPass = (String) optionSet.valueOf(proxyPassOption);
+		String proxyUser = optionSet.valueOf(proxyUserOption);
+		String proxyPass = optionSet.valueOf(proxyPassOption);
 		PasswordAuthentication passwordAuthentication = null;
 		if ((!proxy.equals(Proxy.NO_PROXY)) && (stringHasValue(proxyUser))
 				&& (stringHasValue(proxyPass))) {
@@ -398,6 +400,7 @@ public class Bootstrap extends JFrame {
 
 			final PasswordAuthentication auth = passwordAuthentication;
 			java.net.Authenticator.setDefault(new java.net.Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					return auth;
 				}
@@ -405,8 +408,7 @@ public class Bootstrap extends JFrame {
 			});
 		}
 
-		File workingDirectory = (File) optionSet
-				.valueOf(workingDirectoryOption);
+		File workingDirectory = optionSet.valueOf(workingDirectoryOption);
 		if ((workingDirectory.exists()) && (!workingDirectory.isDirectory()))
 			throw new FatalBootstrapError("Invalid working directory: "
 					+ workingDirectory);
@@ -416,8 +418,7 @@ public class Bootstrap extends JFrame {
 		}
 
 		List<String> strings = optionSet.valuesOf(nonOptions);
-		String[] remainderArgs = (String[]) strings.toArray(new String[strings
-				.size()]);
+		String[] remainderArgs = strings.toArray(new String[strings.size()]);
 
 		boolean force = optionSet.has("force");
 
