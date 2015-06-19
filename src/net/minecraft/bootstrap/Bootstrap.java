@@ -14,6 +14,8 @@ import java.net.Proxy;
 import java.nio.channels.FileChannel;
 import java.security.DigestInputStream;
 import java.util.List;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Pack200;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
@@ -168,12 +170,11 @@ public class Bootstrap extends JFrame {
 
 		println("Unpacking " + lzmaUnpacked + " to " + this.launcherJar);
 
-		java.util.jar.JarOutputStream jarOutputStream = null;
+		JarOutputStream jarOutputStream = null;
 		try {
 			jarOutputStream = new java.util.jar.JarOutputStream(
 					new FileOutputStream(this.launcherJar));
-			java.util.jar.Pack200.newUnpacker().unpack(lzmaUnpacked,
-					jarOutputStream);
+			Pack200.newUnpacker().unpack(lzmaUnpacked, jarOutputStream);
 		} catch (Exception e) {
 			throw new FatalBootstrapError("Unable to un-pack200: " + e);
 		} finally {
