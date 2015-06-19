@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.nio.channels.FileChannel;
@@ -261,7 +262,7 @@ public class Bootstrap extends JFrame {
 			Class<?> aClass = new java.net.URLClassLoader(
 					new java.net.URL[] { launcherJar.toURI().toURL() })
 					.loadClass("net.minecraft.launcher.Launcher");
-			java.lang.reflect.Constructor<?> constructor = aClass
+			Constructor<?> constructor = aClass
 					.getConstructor(new Class[] { JFrame.class, File.class,
 							Proxy.class, PasswordAuthentication.class,
 							String[].class, Integer.class });
