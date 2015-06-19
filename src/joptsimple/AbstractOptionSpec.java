@@ -1,159 +1,134 @@
-/*     */ package joptsimple;
-/*     */ 
-/*     */ import java.util.ArrayList;
-/*     */ import java.util.Collection;
-/*     */ import java.util.Collections;
-/*     */ import java.util.List;
-/*     */ import joptsimple.internal.Reflection;
-/*     */ import joptsimple.internal.ReflectionException;
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ abstract class AbstractOptionSpec<V>
-/*     */   implements OptionSpec<V>, OptionDescriptor
-/*     */ {
-/*  44 */   private final List<String> options = new ArrayList();
-/*     */   private final String description;
-/*     */   private boolean forHelp;
-/*     */   
-/*     */   protected AbstractOptionSpec(String option) {
-/*  49 */     this(Collections.singletonList(option), "");
-/*     */   }
-/*     */   
-/*     */   protected AbstractOptionSpec(Collection<String> options, String description) {
-/*  53 */     arrangeOptions(options);
-/*     */     
-/*  55 */     this.description = description;
-/*     */   }
-/*     */   
-/*     */   public final Collection<String> options() {
-/*  59 */     return Collections.unmodifiableList(this.options);
-/*     */   }
-/*     */   
-/*     */   public final List<V> values(OptionSet detectedOptions) {
-/*  63 */     return detectedOptions.valuesOf(this);
-/*     */   }
-/*     */   
-/*     */   public final V value(OptionSet detectedOptions) {
-/*  67 */     return (V)detectedOptions.valueOf(this);
-/*     */   }
-/*     */   
-/*     */   public String description() {
-/*  71 */     return this.description;
-/*     */   }
-/*     */   
-/*     */   public final AbstractOptionSpec<V> forHelp() {
-/*  75 */     this.forHelp = true;
-/*  76 */     return this;
-/*     */   }
-/*     */   
-/*     */   public final boolean isForHelp() {
-/*  80 */     return this.forHelp;
-/*     */   }
-/*     */   
-/*     */   public boolean representsNonOptions() {
-/*  84 */     return false;
-/*     */   }
-/*     */   
-/*     */   protected abstract V convert(String paramString);
-/*     */   
-/*     */   protected V convertWith(ValueConverter<V> converter, String argument) {
-/*     */     try {
-/*  91 */       return (V)Reflection.convertWith(converter, argument);
-/*     */     }
-/*     */     catch (ReflectionException ex) {
-/*  94 */       throw new OptionArgumentConversionException(options(), argument, converter.valueType(), ex);
-/*     */     }
-/*     */     catch (ValueConversionException ex) {
-/*  97 */       throw new OptionArgumentConversionException(options(), argument, converter.valueType(), ex);
-/*     */     }
-/*     */   }
-/*     */   
-/*     */   protected String argumentTypeIndicatorFrom(ValueConverter<V> converter) {
-/* 102 */     if (converter == null) {
-/* 103 */       return null;
-/*     */     }
-/* 105 */     String pattern = converter.valuePattern();
-/* 106 */     return pattern == null ? converter.valueType().getName() : pattern;
-/*     */   }
-/*     */   
-/*     */   abstract void handleOption(OptionParser paramOptionParser, ArgumentList paramArgumentList, OptionSet paramOptionSet, String paramString);
-/*     */   
-/*     */   private void arrangeOptions(Collection<String> unarranged)
-/*     */   {
-/* 113 */     if (unarranged.size() == 1) {
-/* 114 */       this.options.addAll(unarranged);
-/* 115 */       return;
-/*     */     }
-/*     */     
-/* 118 */     List<String> shortOptions = new ArrayList();
-/* 119 */     List<String> longOptions = new ArrayList();
-/*     */     
-/* 121 */     for (String each : unarranged) {
-/* 122 */       if (each.length() == 1) {
-/* 123 */         shortOptions.add(each);
-/*     */       } else {
-/* 125 */         longOptions.add(each);
-/*     */       }
-/*     */     }
-/* 128 */     Collections.sort(shortOptions);
-/* 129 */     Collections.sort(longOptions);
-/*     */     
-/* 131 */     this.options.addAll(shortOptions);
-/* 132 */     this.options.addAll(longOptions);
-/*     */   }
-/*     */   
-/*     */   public boolean equals(Object that)
-/*     */   {
-/* 137 */     if (!(that instanceof AbstractOptionSpec)) {
-/* 138 */       return false;
-/*     */     }
-/* 140 */     AbstractOptionSpec<?> other = (AbstractOptionSpec)that;
-/* 141 */     return this.options.equals(other.options);
-/*     */   }
-/*     */   
-/*     */   public int hashCode()
-/*     */   {
-/* 146 */     return this.options.hashCode();
-/*     */   }
-/*     */   
-/*     */   public String toString()
-/*     */   {
-/* 151 */     return this.options.toString();
-/*     */   }
-/*     */ }
+package joptsimple;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-/* Location:              M:\AFolderOfMinecraft\Minecraft.jar!\joptsimple\AbstractOptionSpec.class
- * Java compiler version: 5 (49.0)
- * JD-Core Version:       0.7.1
+import joptsimple.internal.Reflection;
+import joptsimple.internal.ReflectionException;
+
+abstract class AbstractOptionSpec<V> implements OptionSpec<V>, OptionDescriptor {
+	private final List<String> options = new ArrayList();
+	private final String description;
+	private boolean forHelp;
+
+	protected AbstractOptionSpec(String option) {
+		this(Collections.singletonList(option), "");
+	}
+
+	protected AbstractOptionSpec(Collection<String> options, String description) {
+		arrangeOptions(options);
+
+		this.description = description;
+	}
+
+	@Override
+	public final Collection<String> options() {
+		return Collections.unmodifiableList(this.options);
+	}
+
+	@Override
+	public final List<V> values(OptionSet detectedOptions) {
+		return detectedOptions.valuesOf(this);
+	}
+
+	@Override
+	public final V value(OptionSet detectedOptions) {
+		return detectedOptions.valueOf(this);
+	}
+
+	@Override
+	public String description() {
+		return this.description;
+	}
+
+	public final AbstractOptionSpec<V> forHelp() {
+		this.forHelp = true;
+		return this;
+	}
+
+	@Override
+	public final boolean isForHelp() {
+		return this.forHelp;
+	}
+
+	@Override
+	public boolean representsNonOptions() {
+		return false;
+	}
+
+	protected abstract V convert(String paramString);
+
+	protected V convertWith(ValueConverter<V> converter, String argument) {
+		try {
+			return Reflection.convertWith(converter, argument);
+		} catch (ReflectionException ex) {
+			throw new OptionArgumentConversionException(options(), argument,
+					converter.valueType(), ex);
+		} catch (ValueConversionException ex) {
+			throw new OptionArgumentConversionException(options(), argument,
+					converter.valueType(), ex);
+		}
+	}
+
+	protected String argumentTypeIndicatorFrom(ValueConverter<V> converter) {
+		if (converter == null) {
+			return null;
+		}
+		String pattern = converter.valuePattern();
+		return pattern == null ? converter.valueType().getName() : pattern;
+	}
+
+	abstract void handleOption(OptionParser paramOptionParser,
+			ArgumentList paramArgumentList, OptionSet paramOptionSet,
+			String paramString);
+
+	private void arrangeOptions(Collection<String> unarranged) {
+		if (unarranged.size() == 1) {
+			this.options.addAll(unarranged);
+			return;
+		}
+
+		List<String> shortOptions = new ArrayList();
+		List<String> longOptions = new ArrayList();
+
+		for (String each : unarranged) {
+			if (each.length() == 1) {
+				shortOptions.add(each);
+			} else {
+				longOptions.add(each);
+			}
+		}
+		Collections.sort(shortOptions);
+		Collections.sort(longOptions);
+
+		this.options.addAll(shortOptions);
+		this.options.addAll(longOptions);
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		if (!(that instanceof AbstractOptionSpec)) {
+			return false;
+		}
+		AbstractOptionSpec<?> other = (AbstractOptionSpec) that;
+		return this.options.equals(other.options);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.options.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.options.toString();
+	}
+}
+
+/*
+ * Location:
+ * M:\AFolderOfMinecraft\Minecraft.jar!\joptsimple\AbstractOptionSpec.class Java
+ * compiler version: 5 (49.0) JD-Core Version: 0.7.1
  */
